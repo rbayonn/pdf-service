@@ -3,7 +3,7 @@ import pdfRoutes from "./routes/pdf.js";
 
 const app = express();
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
@@ -14,5 +14,5 @@ app.get("/", (req, res) => {
 app.use("/", pdfRoutes);
 
 app.listen(PORT, () => {
-    console.log(`Servidor iniciado en http://localhost:${PORT}`);
+  console.log(`Servidor iniciado en puerto ${PORT}`);
 });
