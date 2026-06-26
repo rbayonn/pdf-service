@@ -1,0 +1,9 @@
+Render: curl -X POST https://pdf-service-npws.onrender.com/generate-pdf ^
+-H "Content-Type: application/json" ^
+-d "{\"template\":\"certificado-analisis\",\"data\":{\"op\":\"OP-12345\",\"producto\":\"Desinfectante\",\"lote\":\"L001\",\"fecha\":\"26/06/2026\"}}" ^
+-o certificado-analisis.pdf
+
+Local: curl -X POST http://localhost:3001/generate-pdf ^
+  -H "Content-Type: application/json" ^
+  -d "{\"template\":\"certificado-analisis\",\"data\":{\"op\":\"OP-12345\",\"producto\":\"Desinfectante\",\"lote\":\"L001\",\"fecha\":\"26/06/2026\"}}" ^
+-o certificado-analisis.pdf
