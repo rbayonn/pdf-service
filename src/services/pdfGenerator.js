@@ -10,6 +10,7 @@ const BROWSER_ARGS = isLinux
         "--disable-gpu",                // evita fallos de aceleración gráfica en Linux sin GPU
         "--no-first-run",
         "--no-default-browser-check",
+        "--no-zygote",                  // evita que el proceso zygote falle silenciosamente en containers
     ]
     : [];
 
@@ -46,11 +47,22 @@ export async function generatePdf(html) {
         printBackground: true
     });
 
-    console.log("5 - PDF generado");
+    const pdfBuffer = Buffer.from(pdf);
+
+    console.log("5 - PDF generado, tamaño:", pdfBuffer.length, "bytes");
+    console.log("Header:", pdfBuffer.slice(0, 5).toString("ascii"));
+
+    if (pdfBuffer.length === 0) {
+        throw new Error("page.pdf() devolvió un buffer vacío. Chrome puede haber fallado silenciosamente.");
+    }
+
+    if (pdfBuffer.slice(0, 4).toString("ascii") !== "%PDF") {
+        throw new Error(`Buffer no es un PDF válido. Header recibido: ${pdfBuffer.slice(0, 10).toString("hex")}`);
+    }
 
     await browser.close();
 
     console.log("6 - Browser cerrado");
 
-    return pdf;
+    return pdfBuffer;
 }

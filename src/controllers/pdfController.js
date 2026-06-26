@@ -7,38 +7,22 @@ export async function generatePdfController(req, res) {
 
         const { template, data } = req.body;
 
-        const html = await renderTemplate(
-            template,
-            data
-        );
+        const html = await renderTemplate(template, data);
 
-        const pdfBytes = await generatePdf(html);
+        const pdf = await generatePdf(html);
 
-        const pdf = Buffer.from(pdfBytes);
+        console.log("PDF listo para enviar — tamaño:", pdf.length, "bytes");
 
-        res.setHeader(
-            "Content-Type",
-            "application/pdf"
-        );
-
-        res.setHeader(
-            "Content-Disposition",
-            `inline; filename="${template}.pdf"`
-        );
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="${template}.pdf"`);
 
         res.send(pdf);
 
-        console.log("Constructor:", pdf.constructor.name);
-        console.log("Es Buffer:", Buffer.isBuffer(pdf));
-        console.log("Tamaño:", pdf.length);
-
     } catch (error) {
 
-        console.error(error);
+        console.error("Error generando PDF:", error.message);
 
-        res.status(500).json({
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
 
     }
 }
