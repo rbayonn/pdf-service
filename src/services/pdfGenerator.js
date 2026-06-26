@@ -6,20 +6,19 @@ const BROWSER_ARGS = isLinux
     ? [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",      // usa /tmp en lugar de /dev/shm (64 MB en contenedores)
-        "--disable-gpu",                // evita fallos de aceleración gráfica en Linux sin GPU
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
         "--no-first-run",
         "--no-default-browser-check",
-        "--no-zygote",                  // evita que el proceso zygote falle silenciosamente en containers
+        "--no-zygote",
     ]
     : [];
 
 export async function generatePdf(html) {
-
     console.log("1 - Entrando a generatePdf");
 
     const executablePath =
-        process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath();
+        process.env.PUPPETEER_EXECUTABLE_PATH || await puppeteer.executablePath(); // ← fix principal
 
     console.log("Chrome:", executablePath);
     console.log("Platform:", process.platform);
@@ -30,39 +29,35 @@ export async function generatePdf(html) {
         args: BROWSER_ARGS,
     });
 
-    console.log("2 - Browser iniciado");
+    try {  // ← fix secundario: try/finally para cerrar siempre el browser
+        console.log("2 - Browser iniciado");
 
-    const page = await browser.newPage();
+        const page = await browser.newPage();
+        console.log("3 - Nueva página");
 
-    console.log("3 - Nueva página");
+        await page.setContent(html, { waitUntil: "load" });
+        console.log("4 - HTML cargado");
 
-    await page.setContent(html, {
-        waitUntil: "load"
-    });
+        const pdf = await page.pdf({
+            format: "A4",
+            printBackground: true
+        });
 
-    console.log("4 - HTML cargado");
+        const pdfBuffer = Buffer.from(pdf);
+        console.log("5 - PDF generado, tamaño:", pdfBuffer.length, "bytes");
 
-    const pdf = await page.pdf({
-        format: "A4",
-        printBackground: true
-    });
+        if (pdfBuffer.length === 0) {
+            throw new Error("page.pdf() devolvió un buffer vacío.");
+        }
 
-    const pdfBuffer = Buffer.from(pdf);
+        if (pdfBuffer.slice(0, 4).toString("ascii") !== "%PDF") {
+            throw new Error(`Buffer no es un PDF válido. Header: ${pdfBuffer.slice(0, 10).toString("hex")}`);
+        }
 
-    console.log("5 - PDF generado, tamaño:", pdfBuffer.length, "bytes");
-    console.log("Header:", pdfBuffer.slice(0, 5).toString("ascii"));
+        return pdfBuffer;
 
-    if (pdfBuffer.length === 0) {
-        throw new Error("page.pdf() devolvió un buffer vacío. Chrome puede haber fallado silenciosamente.");
+    } finally {
+        await browser.close(); // ← se ejecuta siempre, haya error o no
+        console.log("6 - Browser cerrado");
     }
-
-    if (pdfBuffer.slice(0, 4).toString("ascii") !== "%PDF") {
-        throw new Error(`Buffer no es un PDF válido. Header recibido: ${pdfBuffer.slice(0, 10).toString("hex")}`);
-    }
-
-    await browser.close();
-
-    console.log("6 - Browser cerrado");
-
-    return pdfBuffer;
 }
