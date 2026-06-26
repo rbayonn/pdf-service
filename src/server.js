@@ -7,6 +7,14 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
+app.post("/ping", (req, res) => {
+  console.log("PING recibido");
+  res.json({
+    ok: true,
+    body: req.body
+  });
+});
+
 app.get("/", (req, res) => {
     res.send("PDF Service funcionando 🚀");
 });
