@@ -25,4 +25,17 @@ export async function generatePdfController(req, res) {
         res.status(500).json({ error: error.message });
 
     }
+
+export async function generatePdfFromHtml(req, res) {
+    try {
+        const { html } = req.body;
+        const pdf = await generatePdf(html);
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="documento.pdf"`);
+        res.send(pdf);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
 }
