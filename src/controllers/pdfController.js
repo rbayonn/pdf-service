@@ -7,6 +7,8 @@ export async function generatePdfController(req, res) {
 
         const { template, data } = req.body;
 
+        console.log("Data recibida de n8n:", JSON.stringify(data, null, 2));
+
         const html = await renderTemplate(template, data);
 
         const pdf = await generatePdf(html);
