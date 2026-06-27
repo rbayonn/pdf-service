@@ -7,7 +7,7 @@ export async function generatePdfController(req, res) {
 
         const { template, data } = req.body;
 
-        console.log("Data recibida de n8n:", JSON.stringify(data, null, 2));
+        console.log("Data recibida de workflow:", JSON.stringify(data, null, 2));
 
         const html = await renderTemplate(template, data);
 
@@ -28,6 +28,8 @@ export async function generatePdfController(req, res) {
 
     }
 
+}
+
 export async function generatePdfFromHtml(req, res) {
     try {
         const { html } = req.body;
@@ -39,5 +41,4 @@ export async function generatePdfFromHtml(req, res) {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}
 }

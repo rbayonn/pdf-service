@@ -1,5 +1,5 @@
 import express from "express";
-import { generatePdfController } from "../controllers/pdfController.js";
+import { generatePdfController, generatePdfFromHtml } from "../controllers/pdfController.js";
 
 const router = express.Router();
 
