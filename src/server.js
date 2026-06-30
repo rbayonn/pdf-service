@@ -16,7 +16,7 @@ app.post("/ping", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-    res.send("PDF Service funcionando 🚀");
+  res.status(200).json({ status: "ok", message: "PDF Service funcionando" });
 });
 
 app.use("/", pdfRoutes);
